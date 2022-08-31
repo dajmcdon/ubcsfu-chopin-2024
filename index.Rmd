@@ -1,0 +1,112 @@
+---
+title: "Talk title"
+author: "Daniel J. McDonald"
+date: "xx Month yyyy"
+output:
+  xaringan::moon_reader:
+    css: [src/xaringan-themer.css, src/slides-style.css]
+    nature:
+      beforeInit: ["src/macros.js"]
+      highlightStyle: github
+      highlightLines: true
+      ratio: 16:9
+      countIncrementalSlides: true
+    seal: false
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(lubridate)
+library(fontawesome)
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(
+  dev = "svg",
+  fig.path = "gfx/",
+  fig.align = 'center',
+  fig.width=9, fig.height=3.5, fig.retina=3,
+  fig.showtext = TRUE,
+  out.width = "100%",
+  cache = TRUE,
+  autodep = TRUE,
+  echo = FALSE,
+  message = FALSE, 
+  warning = FALSE,
+  hiline = TRUE
+)
+```
+
+```{r xaringan-themer, include=FALSE, warning=FALSE}
+library(xaringanthemer)
+primary = "#002145"
+secondary = "#6495ed"
+tertiary = "#ffa319"
+fourth_color = "#DB0B5B"
+
+style_duo_accent(
+  primary_color      = primary,  #"#002145", # UBC primary
+  secondary_color    = secondary,  #"6EC4E8", # UBC secondary 4
+  header_font_google = google_font("EB Garamond"),
+  text_font_google = google_font("Open Sans"),
+  code_font_google = google_font("Fira Mono"),
+  text_color = primary,
+  table_row_even_background_color = lighten_color(primary, 0.8),
+  colors = c(
+    tertiary = tertiary, fourth_color = fourth_color,
+    light_pri = lighten_color(primary, 0.8),
+    light_sec = lighten_color(secondary, 0.8),
+    light_ter = lighten_color(tertiary, 0.8),
+    light_fou = lighten_color(fourth_color, 0.8)
+    ),
+  outfile = here::here("src/xaringan-themer.css")
+)
+# theme_set(theme_xaringan())
+```
+
+layout: true
+
+<div class="my-footer"><span><a href="https://dajmcdon.github.io/talktemplate" style="color:white">dajmcdon.github.io/talk-template</a></span></div> 
+
+---
+background-image: url("gfx/cover.svg")
+background-size: contain
+background-position: top
+
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+
+
+.center[# Talk Title]
+
+
+.pull-left[
+###Daniel J. McDonald
+###University of British Columbia
+####CMStatistics &mdash; xx Month yyyy
+]
+
+<!--
+
+Optional code to include QR links
+
+.pull-right[.center[.middle[
+<table>
+<tr>
+<td>![:scale 60%](gfx/qr-paper.png)</td>
+<td>![:scale 90%](gfx/qr-slides.png)</td>
+<td>![:scale 90%](gfx/qr-mywww.png)</td>
+</tr>
+<tr>
+<td>`r fa("file-alt")` Paper</td>
+<td>`r fa("chalkboard-teacher")` Slides</td>
+<td>`r fa("at")` My WWW</td>
+</tr>
+</table>
+]]]
+
+???
+
+
+-->
+
+
+
