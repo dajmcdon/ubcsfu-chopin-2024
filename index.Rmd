@@ -1,7 +1,7 @@
 ---
 title: "Markov Switching State-Space Models for Uncovering Musical Interpretation"
 author: "Daniel J. McDonald"
-date: "xx Month yyyy"
+date: "24 October 2022"
 output:
   xaringan::moon_reader:
     css: [src/xaringan-themer.css, src/slides-style.css]
@@ -136,7 +136,7 @@ background-position: top
 .pull-left[
 ###Daniel J. McDonald
 ###University of British Columbia
-####9 September 2022
+####24 October 2022
 ]
 
 
@@ -146,23 +146,69 @@ background-position: top
 ]
 
 
+---
+background-image: url("gfx/State-cello-0299.jpg")
+background-size: contain
+
+
+
+---
+background-image: url("gfx/jacobs.jpg")
+background-size: contain
+
+
+???
+
+* Dabbled in Economics
+* PhD is Statistics
+* IU happened to have an opening
+* Met Prof. Chris Raphael at my interview
+* Accepted the Job
+* Occasionally dabbled in Music on the Side
+* First invited talk at Laval on Music
+* Finally published the paper in 2021
+* First in-person talk post-pandemic
+* Seemed more fun than talking about all the COVID modelling or riveting stat theory
+
+
+---
+background-image: url("https://img.freepik.com/free-vector/musical-pentagram-sound-waves-notes-background_1017-33911.jpg?w=1800&t=st=1666393969~exp=1666394569~hmac=2bd5438306b82462af3c31fb52c733010cd2f8ff069fcba5324d16a25638af2f")
+background-size: contain
+
 
 
 ---
 
 ## Musical taste
 
+.pull-left[
 * Easy to describe music you like:
   - "Jazzy sound"
+  
   - "Strong beat"
+  
   - "good lyrics"
+  
   - "anything by Taylor Swift"
+]
+
+.pull-right[
+
+<div class="tenor-gif-embed" data-postid="8009181" data-share-method="host" data-aspect-ratio="1.30612" data-width="80%"><a href="https://tenor.com/view/head-phones-music-recording-studio-listening-to-music-bart-gif-8009181">Listening To Music GIF</a>from <a href="https://tenor.com/search/head+phones-gifs">Head Phones GIFs</a></div> <script type="text/javascript" async src="https://tenor.com/embed.js"></script>
+
+]
+  
+--
+ 
+ .pull-left[
   
 * Harder to describe a .tertiary[performance]
 
 * Classical music is mainly about performances of the .tertiary[same] music
 
 * How do we think about which ones we like?
+
+]
 
 ---
 
@@ -236,6 +282,7 @@ Which one do you like better?
 
 ## What's different?
 
+.pull-left[
 1. Mistakes
 
 2. Extraneous noise
@@ -247,6 +294,14 @@ Which one do you like better?
 5. Dynamics
 
 6. Tempo / Rubato
+]
+
+.pull-right[
+
+![:scale 90%](https://media.wbur.org/wp/2019/04/gustavo-dudamel.jpg)
+
+.tiny[Source: WBUR Boston]
+]
 
 ???
 
@@ -268,8 +323,8 @@ Piano music
 
 * Simplifies the problem
   - No bowing, fingering, breathing, glissando
-  
 * Focus on __tempo__ 
+* professional pianists would cringe as I say this, but contrast with strings / winds / singers
 
 
 
@@ -480,6 +535,11 @@ ggplot(filter(plots, performer == 'Richter 1976')) +
 
 ]
 
+.center[
+![:scale 40%](gfx/mazurka-dance.jpeg)
+]
+
+
 ???
 
 Everything he wrote includes piano
@@ -592,9 +652,12 @@ include_graphics("gfx/ss-mod-flow.svg")
 
 ???
 
-Musicians aren't perfect.
-
-Observe noisy realization
+* Musicians aren't perfect.
+* Imagine a speed that they'll maintain in CT state.
+* Accelerate/Decel from there.
+* Need to track tempo/accel in $X_k$.
+* These depend on $S_k$ and $S_{k-1}$
+* Observe noisy realization
 
 
 ---
@@ -603,33 +666,42 @@ Observe noisy realization
 
 .emphasis[
  We want to estimate 
- 1. parameters $\theta$
- 2. hidden states $S_k$
- 3. hidden states $X_k$
+ 
+1. parameters $\theta$ &mdash; transition probabilities, mean tempos, variances
+2. hidden states $S_k$ 
+3. hidden states $X_k$
 ]
 
-<br/>
 
-* If you know $\{S_k\}_{k=1}^n$ and $\theta$  `r fa("right-long", fill="#8BC1FA")` `r fa("right-long", fill=secondary)` `r fa("right-long")` Kalman filter gives $\{\hat{X}_k\}_{k=1}^n$
+If you know $\{S_k\}_{k=1}^n$ and $\theta$  `r fa("right-long", fill="#8BC1FA")` `r fa("right-long", fill=secondary)` `r fa("right-long")` .tertiary[Kalman filter] gives $\{\widehat{X}_k\}_{k=1}^n$ 
+* this is $O(n)$ for each likelihood evaluation
 
-<br/>
 
-* If you know $\{X_k\}_{k=1}^n$ and $\theta$ `r fa("right-long", fill="#8BC1FA")` `r fa("right-long", fill=secondary)` `r fa("right-long")` Viterbi algorithm gives $\{\hat{S}_k\}_{k=1}^n$
+If you know $\{X_k\}_{k=1}^n$ and $\theta$ `r fa("right-long", fill="#8BC1FA")` `r fa("right-long", fill=secondary)` `r fa("right-long")` .tertiary[Viterbi algorithm] gives $\{\widehat{S}_k\}_{k=1}^n$ 
+* this is $O(n)$ for each likelihood evaluation
 
-<br>
 
 .info[
 
-.large[But how do we estimate all of it?]
+But how do we estimate all of it? &mdash; both unknown is $O(b^n)$ for each likelihood evaluation.
 
 ]
 
+???
+
+* Evaluating the likelihood for one $\theta$ is exponential in \# of notes.
+* Non-convex to optimize over both.
+
+
+--
+
+.secondary[This is a problem]
 
 ---
 
 ## Kalman filter
 
-* Developed in the late '50s to track missiles
+.pull-left[* Developed in the late 1950s to track missiles]
 
 $$
 \begin{aligned}
@@ -638,6 +710,7 @@ Y_k &= c_k + Z_k X_k + \epsilon_{k}&\epsilon_k & \sim \textrm{N}(0, G_k)\\
 \end{aligned}
 $$
 
+.pull-left[
 * Assume $X_0$ is Gaussian
 
 * Just track mean and variance of $X_k\ |\ \{Y_i\}_{i=1}^k$
@@ -645,9 +718,13 @@ $$
 * Does this iteratively for each $k$
 
 * Gives "filter" estimate of $\{X_k\}_{k=1}^n$ and likelihood
+]
 
-???
-Here At and Zt and the components of epsilon are contained in theta
+.pull-right[
+![](https://assets.bwbx.io/images/users/iqjWHBFdfxIU/iEmS3Tk.cj8U/v0/1400x-1.jpg)
+
+.tiny[Photographer: Anas Baba/AFP/Getty Images]
+]
 
 
 ---
@@ -661,9 +738,9 @@ Here At and Zt and the components of epsilon are contained in theta
 .pull-left[
 $$
 \begin{aligned}
-X_{k} &= d(s_k,s_{k-1}) + T(s_k,s_{k-1}) X_{k-1} + \eta_{k}\\\\
+X_{k} &= d(s_k,\ s_{k-1}) + T(s_k,\ s_{k-1}) X_{k-1} + \eta_{k}\\\\
 Y_k &= c(s_k) + Z(s_k) X_k + \epsilon_{k}\\\\
-\eta_{k} &\sim \textrm{N}(0, Q(s_k,s_{k-1}))\\\\
+\eta_{k} &\sim \textrm{N}(0, Q(s_k,\ s_{k-1}))\\\\
 \epsilon_k & \sim \textrm{N}(0, G(s_k))
 \end{aligned}
 $$
@@ -720,35 +797,8 @@ x is dim-2 (speed, acceleration)
 What is $li$?
 ---
 
-## 1-step Kalman filter &mdash; .secondary[kalman()]
-
-Get estimates of $X_{k}$ given a new observation $y_k$
-
-Input: 
-  * New data &mdash; $y_k$, 
-  * Parameter matrices &mdash; $d_k$, $c_k$, $T_k$, $Z_k$, $Q_k$, $G_k$, 
-  * Previous state mean and variance &mdash; $x_{k-1}$, $P_{k-1}$
-
-Predict new state `r fa("right-long", fill="#8BC1FA")` `r fa("right-long", fill=secondary)` `r fa("right-long")` $\hat{x}_k = d + Tx_{k-1}$ &emsp; $\hat{P}_k = Q+TP_{k-1}T^\top$
-
-Predict current data `r fa("right-long", fill="#8BC1FA")` `r fa("right-long", fill=secondary)` `r fa("right-long")` $\hat{y}_k = c + Z\hat{x}_k$ &emsp; $F=G + Z\hat{P}_kZ^\top$
-
-Calculate error `r fa("right-long", fill="#8BC1FA")` `r fa("right-long", fill=secondary)` `r fa("right-long")` $v = y_k - \hat{y}_k$ &emsp; $K = \hat{P}_kZ^\top F^{-1}$
-
-Update `r fa("right-long", fill="#8BC1FA")` `r fa("right-long", fill=secondary)` `r fa("right-long")` $x_k = \hat{x}_k + Kv$ &emsp; $P_k = \hat{P}_k(I - Z^\top K)$
-
-Log Likelihood `r fa("right-long", fill="#8BC1FA")` `r fa("right-long", fill=secondary)` `r fa("right-long")` $\ell_k(\theta) \propto \ell_{k-1}(\theta) - v^\top F^{-1} v - \log(|F|)$
-
-???
-
-If know S, then that pins down all the parameter matrices
-
-Loop this over 1 ... n
-
-Maximize over theta
 
 
----
 
 ## We don't know the discrete states
 
@@ -822,17 +872,16 @@ collapsibleTree(const, fill = "fill", fontSize = 16, collapsed = TRUE)
 
 ???
 
-This is a greedy approximation
+* This is a greedy approximation
+* AKA "Beam Search"
+* The sampling step is important
+* Probability of sampling is proportional to current weight times likelihood times trans prob
+* Example supposing J = 5
 
-The sampling step is important
-
-Probability of sampling is proportional to current weight times likelihood times trans prob
-
-Example supposing J = 5
 
 ---
 
-## The complete algorithm
+## The complete procedure
 
 For each performance:
 
@@ -848,11 +897,9 @@ For each performance:
 
 ???
 
-kfilter() 1 step appears in dpf()
-
-ksmoother() is conditional on all the data
-
-Takes a few minutes per performance when 4 is done intelligently
+* kfilter() 1 step appears in dpf()
+* ksmoother() is conditional on all the data
+* Takes a few minutes per performance when 4 is done intelligently
 
 
 ---
@@ -871,7 +918,7 @@ ggplot(filter(plots, performer %in% c('Richter 1976', 'Hatto 1993'))) +
   geom_point(aes(x=measure, y=inferred, color=state,shape=state),size=2) +
  # scale_color_brewer(palette='Set1') +
   scale_color_brewer(palette = "PuOr", direction = -1) +
-  scale_shape_manual(values=15:18) +
+  scale_shape_manual(values=perfshapes) +
   #theme(legend.position = 'bottom', legend.title = element_blank(),
   #      strip.text = element_text(hjust = 0))  +
   facet_wrap(~performer, ncol = 1)
@@ -892,7 +939,9 @@ For each performance, we estimate $\theta$ by penalized maximum likelihood.
 The parameters are things like:
 
   - average speed in different states
+  
   - some variance parameters
+  
   - transition probabilities
   
 We have strong prior information.
@@ -935,52 +984,106 @@ $$d(\theta,\theta') = \sqrt{(\theta-\theta')^\top V^{-1}(\theta-\theta')}$$
 
 .pull-right[
 
-```{r parametric-clusters,fig.width=5,fig.height=5, out.width="90%",fig.align='center'}
-#hc_parm = hc_parm+diag(1e-12,nrow(hc_parm))
+```{r parametric-clusters,fig.width=5,fig.height=5, out.width="90%",fig.align='center', dev="png"}
+source(here::here("src", "group_means_upper_tri.R"))
+
 othercut = .35
-subs = apply(hc_parm,1,quantile,probs=4/46) < othercut
+subs = apply(hc_parm, 1, quantile, probs = 4/46) < othercut
 sDmat = hc_parm[subs,subs]
+sdends = sDmat %>% as.dist %>% hclust %>% as.dendrogram
 nclusts = 4
 colorthem = TRUE
-heatmap.2(
-  hc_parm, Rowv = dend_parm, Colv = dend_parm, 
-  symm=TRUE,
-  dendrogram = 'none',
-  density.info = 'none', trace='none',
-          #labRow = TRUE,
-  labCol = NA, labRow = NA,
-  key.title = NA,
-  col= viridis,#colorRampPalette(c('#0b61a4','white')),
-  key.xlab = NA, 
-  margins = c(1,1),
-  cexRow = 1,
-  cexCol = .6,
-  lhei=c(1,15),
-  lwid=c(1,25),
-  offsetCol = 0, offsetRow = 0,
-  key=FALSE
-)
+rind1 <- order.dendrogram(dend_parm)
+mat <- hc_parm[rind1, rind1]
+main_clusts <- cutree(as.hclust(sdends), k = nclusts)
+pos <- match(names(main_clusts), rownames(mat))
+all_clusts <- rep(5L, nrow(hc_parm))
+all_clusts[pos] <- main_clusts
+rind <- sort.int(all_clusts, index.return = TRUE)
+mat2 <- mat[rind$ix, rind$ix]
+
+m <- group_means_upper_tri(sqrt(mat2), rind$x)
+rownames(m) <- NULL
+colnames(m) <- NULL
+m <- reshape2::melt(t(m[46:1,]), na.rm = TRUE)
+sply <- 46 - cumsum(rle(rind$x)$lengths)[1:4] + .5
+splx <- cumsum(rle(rind$x)$lengths)[1:4] + .5
+ggplot(m, aes(Var1, Var2, fill = value)) + 
+  geom_raster() + 
+  scale_fill_viridis_c(direction = -1) +
+  theme_void() +
+  coord_equal() +
+  geom_hline(yintercept = sply, color = "#ffffff", size = .2) +
+  geom_vline(xintercept = splx, color = "#ffffff", size = .2) +
+  theme(legend.position = "none")
 ```
 
 ]
 
 ---
 
-```{r other-removed,fig.width=6, fig.height=5, fig.align='center',out.width="60%"}
-sdends = sDmat %>% as.dist %>% hclust %>% as.dendrogram
+```{r include-ai-gfx, out.height="600px", out.width="705px", fig.align="center"}
+knitr::include_graphics("gfx/good-clusters.png")
+```
+
+```{r other-rem-alt1, fig.width=6, fig.height=5, include=FALSE, dev="png"}
+ss <- order.dendrogram(sdends)
+main_clusts <- main_clusts[ss]
+j <- 1
+for (i in unique(main_clusts)) {
+  main_clusts[main_clusts == i] = letters[j]
+  j <- j + 1
+}
+j <- 1
+for (i in unique(main_clusts)) {
+  main_clusts[main_clusts == i] = j
+  j <- j + 1
+}
+main_clusts <- as.numeric(main_clusts)
+
+mat2 <- sDmat[ss, ss]
+m2 <- group_means_upper_tri(sqrt(mat2), main_clusts)
+# rownames(m2) <- NULL
+# colnames(m2) <- NULL
+m2 <- reshape2::melt(t(m2[nrow(m2):1, ]), na.rm = TRUE)
+sply <- length(ss) - cumsum(rle(main_clusts)$lengths)[1:3] + .5
+splx <- cumsum(rle(main_clusts)$lengths)[1:3] + .5
+ggplot(m2, aes(Var1, Var2, fill = value)) + 
+  geom_raster() + 
+  scale_fill_viridis_c(direction = -1) +
+  #theme_void() +
+  coord_equal() +
+  xlab("") + ylab("") +
+  geom_hline(yintercept = sply, color = "#ffffff", size = .2) +
+  geom_vline(xintercept = splx, color = "#ffffff", size = .2) +
+  theme(legend.position = "none", plot.margin = margin(),
+        axis.ticks.x = element_blank(),
+        axis.text.x = element_blank(),
+        panel.background = element_blank(),
+        panel.grid = element_blank())
+```
+
+```{r other-rem-alt2, fig.width=6, fig.height=1, include=FALSE, dev="png"}
 if(colorthem) sdends = sdends %>% 
   set('labels_col', value=fivecolors[c(4,3,1,2)], k=nclusts) %>%
   set('branches_lty', 1) %>%
   set('branches_k_color', value=fivecolors[c(4,3,1,2)], k=nclusts)
+library(dendextend)
+ggplot(as.ggdend(sdends), labels = FALSE)
+```
+
+```{r other-removed,fig.width=6, fig.height=5, fig.align='center',out.width="60%", include=FALSE}
+
 heatmap.2(sDmat,
           Rowv = sdends, Colv = sdends,
-          symm=TRUE,
+          symm=FALSE,
           density.info = 'none', trace='none',
           #labRow = TRUE,
           labCol = NA,
           key.title = NA,
           col=viridis,#colorRampPalette(c('#0b61a4','white')),
           key.xlab = NA, 
+          sepwidth = c(0,0),
           margins = c(1,8),
           cexRow = 1,
           cexCol = .6,
@@ -1088,6 +1191,7 @@ ggplot(similar) +
   # scale_color_brewer(palette='Set1') +
   scale_x_continuous(expand = expansion()) +
   scale_color_brewer(palette = "PuOr", direction = -1,drop=FALSE) + th +
+  scale_shape_manual(values=perfshapes) +
   theme(legend.position = "right") +
   facet_wrap(~cl,nrow=2) #+
 ```
@@ -1107,7 +1211,9 @@ ggplot(similar) +
   geom_point(aes(x=measure, y=inferred, color=state,shape=state),size=2) +
   scale_x_continuous(expand = expansion()) +
   # scale_color_brewer(palette='Set1') +
-  scale_color_brewer(palette = "PuOr", direction = -1,drop=FALSE) + th +
+  scale_color_brewer(palette = "PuOr", direction = -1,
+                     drop=FALSE) + th +
+  scale_shape_manual(values=perfshapes) +
   theme(legend.position = "right") +
   facet_wrap(~cl,nrow=2) #+
 ```
@@ -1132,6 +1238,15 @@ ggplot(filter(plots, performer == 'Cortot 1951')) +
   # scale_color_manual(values = fivecolors)
 ```
 
+???
+
+* Not actually Cortot
+* Likely Hatto or perhaps even an engineered recording
+* This was a major scandal for the British record label in about 2008
+* Lots of other faked recordings
+* Discovered by uploading to iTunes, gave it the wrong album cover
+
+
 ---
 
 
@@ -1147,6 +1262,15 @@ ggplot(filter(plots, performer == 'Cortot 1951')) +
 
 * We use the learned representations to compare and contrast recordings 
 
+--
+
+### Future work 
+
+* Similar model for dynamics
+
+* Can we do this fast and "online"?
+
+* Use it for teaching?
 
 
 ---
@@ -1172,4 +1296,39 @@ ggplot(filter(plots, performer == 'Cortot 1951')) +
 <img src="gfx/nsf-logo.png" height="100px" align="left" hspace=5%>
 <img src="https://www.nserc-crsng.gc.ca/img/logos/img-logo2-en.png" height="100px" align="right" hspace=5%>
 ]
+
+---
+class: inverse, middle, center
+
+# Appendix
+
+---
+
+## 1-step Kalman filter &mdash; .secondary[kalman()]
+
+Get estimates of $X_{k}$ given a new observation $y_k$
+
+Input: 
+  * New data &mdash; $y_k$, 
+  * Parameter matrices &mdash; $d_k$, $c_k$, $T_k$, $Z_k$, $Q_k$, $G_k$, 
+  * Previous state mean and variance &mdash; $x_{k-1}$, $P_{k-1}$
+
+Predict new state `r fa("right-long", fill="#8BC1FA")` `r fa("right-long", fill=secondary)` `r fa("right-long")` $\hat{x}_k = d + Tx_{k-1}$ &emsp; $\hat{P}_k = Q+TP_{k-1}T^\top$
+
+Predict current data `r fa("right-long", fill="#8BC1FA")` `r fa("right-long", fill=secondary)` `r fa("right-long")` $\hat{y}_k = c + Z\hat{x}_k$ &emsp; $F=G + Z\hat{P}_kZ^\top$
+
+Calculate error `r fa("right-long", fill="#8BC1FA")` `r fa("right-long", fill=secondary)` `r fa("right-long")` $v = y_k - \hat{y}_k$ &emsp; $K = \hat{P}_kZ^\top F^{-1}$
+
+Update `r fa("right-long", fill="#8BC1FA")` `r fa("right-long", fill=secondary)` `r fa("right-long")` $x_k = \hat{x}_k + Kv$ &emsp; $P_k = \hat{P}_k(I - Z^\top K)$
+
+Log Likelihood `r fa("right-long", fill="#8BC1FA")` `r fa("right-long", fill=secondary)` `r fa("right-long")` $\ell_k(\theta) \propto \ell_{k-1}(\theta) - v^\top F^{-1} v - \log(|F|)$
+
+???
+
+If know S, then that pins down all the parameter matrices
+
+Loop this over 1 ... n
+
+Maximize over theta
+
 

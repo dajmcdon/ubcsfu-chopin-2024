@@ -4,6 +4,7 @@
     <title>Markov Switching State-Space Models for Uncovering Musical Interpretation</title>
     <meta charset="utf-8" />
     <meta name="author" content="Daniel J. McDonald" />
+    <meta name="date" content="2022-10-24" />
     <script src="index_files/header-attrs/header-attrs.js"></script>
     <script src="index_files/htmlwidgets/htmlwidgets.js"></script>
     <script src="index_files/d3/d3.min.js"></script>
@@ -46,7 +47,7 @@ background-position: top
 .pull-left[
 ###Daniel J. McDonald
 ###University of British Columbia
-####9 September 2022
+####24 October 2022
 ]
 
 
@@ -56,23 +57,69 @@ background-position: top
 ]
 
 
+---
+background-image: url("gfx/State-cello-0299.jpg")
+background-size: contain
+
+
+
+---
+background-image: url("gfx/jacobs.jpg")
+background-size: contain
+
+
+???
+
+* Dabbled in Economics
+* PhD is Statistics
+* IU happened to have an opening
+* Met Prof. Chris Raphael at my interview
+* Accepted the Job
+* Occasionally dabbled in Music on the Side
+* First invited talk at Laval on Music
+* Finally published the paper in 2021
+* First in-person talk post-pandemic
+* Seemed more fun than talking about all the COVID modelling or riveting stat theory
+
+
+---
+background-image: url("https://img.freepik.com/free-vector/musical-pentagram-sound-waves-notes-background_1017-33911.jpg?w=1800&amp;t=st=1666393969~exp=1666394569~hmac=2bd5438306b82462af3c31fb52c733010cd2f8ff069fcba5324d16a25638af2f")
+background-size: contain
+
 
 
 ---
 
 ## Musical taste
 
+.pull-left[
 * Easy to describe music you like:
   - "Jazzy sound"
+  
   - "Strong beat"
+  
   - "good lyrics"
+  
   - "anything by Taylor Swift"
+]
+
+.pull-right[
+
+&lt;div class="tenor-gif-embed" data-postid="8009181" data-share-method="host" data-aspect-ratio="1.30612" data-width="80%"&gt;&lt;a href="https://tenor.com/view/head-phones-music-recording-studio-listening-to-music-bart-gif-8009181"&gt;Listening To Music GIF&lt;/a&gt;from &lt;a href="https://tenor.com/search/head+phones-gifs"&gt;Head Phones GIFs&lt;/a&gt;&lt;/div&gt; &lt;script type="text/javascript" async src="https://tenor.com/embed.js"&gt;&lt;/script&gt;
+
+]
+  
+--
+ 
+ .pull-left[
   
 * Harder to describe a .tertiary[performance]
 
 * Classical music is mainly about performances of the .tertiary[same] music
 
 * How do we think about which ones we like?
+
+]
 
 ---
 
@@ -146,6 +193,7 @@ Which one do you like better?
 
 ## What's different?
 
+.pull-left[
 1. Mistakes
 
 2. Extraneous noise
@@ -157,6 +205,14 @@ Which one do you like better?
 5. Dynamics
 
 6. Tempo / Rubato
+]
+
+.pull-right[
+
+![:scale 90%](https://media.wbur.org/wp/2019/04/gustavo-dudamel.jpg)
+
+.tiny[Source: WBUR Boston]
+]
 
 ???
 
@@ -178,8 +234,8 @@ Piano music
 
 * Simplifies the problem
   - No bowing, fingering, breathing, glissando
-  
 * Focus on __tempo__ 
+* professional pianists would cringe as I say this, but contrast with strings / winds / singers
 
 
 
@@ -298,6 +354,11 @@ class: middle
 
 ]
 
+.center[
+![:scale 40%](gfx/mazurka-dance.jpeg)
+]
+
+
 ???
 
 Everything he wrote includes piano
@@ -406,9 +467,12 @@ class: center, middle, inverse
 
 ???
 
-Musicians aren't perfect.
-
-Observe noisy realization
+* Musicians aren't perfect.
+* Imagine a speed that they'll maintain in CT state.
+* Accelerate/Decel from there.
+* Need to track tempo/accel in `\(X_k\)`.
+* These depend on `\(S_k\)` and `\(S_{k-1}\)`
+* Observe noisy realization
 
 
 ---
@@ -417,33 +481,42 @@ Observe noisy realization
 
 .emphasis[
  We want to estimate 
- 1. parameters `\(\theta\)`
- 2. hidden states `\(S_k\)`
- 3. hidden states `\(X_k\)`
+ 
+1. parameters `\(\theta\)` &amp;mdash; transition probabilities, mean tempos, variances
+2. hidden states `\(S_k\)` 
+3. hidden states `\(X_k\)`
 ]
 
-&lt;br/&gt;
 
-* If you know `\(\{S_k\}_{k=1}^n\)` and `\(\theta\)`  <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#8BC1FA;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#6495ed;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> Kalman filter gives `\(\{\hat{X}_k\}_{k=1}^n\)`
+If you know `\(\{S_k\}_{k=1}^n\)` and `\(\theta\)`  <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#8BC1FA;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#6495ed;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> .tertiary[Kalman filter] gives `\(\{\widehat{X}_k\}_{k=1}^n\)` 
+* this is `\(O(n)\)` for each likelihood evaluation
 
-&lt;br/&gt;
 
-* If you know `\(\{X_k\}_{k=1}^n\)` and `\(\theta\)` <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#8BC1FA;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#6495ed;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> Viterbi algorithm gives `\(\{\hat{S}_k\}_{k=1}^n\)`
+If you know `\(\{X_k\}_{k=1}^n\)` and `\(\theta\)` <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#8BC1FA;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#6495ed;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> .tertiary[Viterbi algorithm] gives `\(\{\widehat{S}_k\}_{k=1}^n\)` 
+* this is `\(O(n)\)` for each likelihood evaluation
 
-&lt;br&gt;
 
 .info[
 
-.large[But how do we estimate all of it?]
+But how do we estimate all of it? &amp;mdash; both unknown is `\(O(b^n)\)` for each likelihood evaluation.
 
 ]
 
+???
+
+* Evaluating the likelihood for one `\(\theta\)` is exponential in \# of notes.
+* Non-convex to optimize over both.
+
+
+--
+
+.secondary[This is a problem]
 
 ---
 
 ## Kalman filter
 
-* Developed in the late '50s to track missiles
+.pull-left[* Developed in the late 1950s to track missiles]
 
 $$
 `\begin{aligned}
@@ -452,6 +525,7 @@ Y_k &amp;= c_k + Z_k X_k + \epsilon_{k}&amp;\epsilon_k &amp; \sim \textrm{N}(0, 
 \end{aligned}`
 $$
 
+.pull-left[
 * Assume `\(X_0\)` is Gaussian
 
 * Just track mean and variance of `\(X_k\ |\ \{Y_i\}_{i=1}^k\)`
@@ -459,9 +533,13 @@ $$
 * Does this iteratively for each `\(k\)`
 
 * Gives "filter" estimate of `\(\{X_k\}_{k=1}^n\)` and likelihood
+]
 
-???
-Here At and Zt and the components of epsilon are contained in theta
+.pull-right[
+![](https://assets.bwbx.io/images/users/iqjWHBFdfxIU/iEmS3Tk.cj8U/v0/1400x-1.jpg)
+
+.tiny[Photographer: Anas Baba/AFP/Getty Images]
+]
 
 
 ---
@@ -475,9 +553,9 @@ Here At and Zt and the components of epsilon are contained in theta
 .pull-left[
 $$
 `\begin{aligned}
-X_{k} &amp;= d(s_k,s_{k-1}) + T(s_k,s_{k-1}) X_{k-1} + \eta_{k}\\\\
+X_{k} &amp;= d(s_k,\ s_{k-1}) + T(s_k,\ s_{k-1}) X_{k-1} + \eta_{k}\\\\
 Y_k &amp;= c(s_k) + Z(s_k) X_k + \epsilon_{k}\\\\
-\eta_{k} &amp;\sim \textrm{N}(0, Q(s_k,s_{k-1}))\\\\
+\eta_{k} &amp;\sim \textrm{N}(0, Q(s_k,\ s_{k-1}))\\\\
 \epsilon_k &amp; \sim \textrm{N}(0, G(s_k))
 \end{aligned}`
 $$
@@ -532,35 +610,8 @@ x is dim-2 (speed, acceleration)
 What is `\(li\)`?
 ---
 
-## 1-step Kalman filter &amp;mdash; .secondary[kalman()]
-
-Get estimates of `\(X_{k}\)` given a new observation `\(y_k\)`
-
-Input: 
-  * New data &amp;mdash; `\(y_k\)`, 
-  * Parameter matrices &amp;mdash; `\(d_k\)`, `\(c_k\)`, `\(T_k\)`, `\(Z_k\)`, `\(Q_k\)`, `\(G_k\)`, 
-  * Previous state mean and variance &amp;mdash; `\(x_{k-1}\)`, `\(P_{k-1}\)`
-
-Predict new state <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#8BC1FA;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#6495ed;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> `\(\hat{x}_k = d + Tx_{k-1}\)` &amp;emsp; `\(\hat{P}_k = Q+TP_{k-1}T^\top\)`
-
-Predict current data <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#8BC1FA;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#6495ed;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> `\(\hat{y}_k = c + Z\hat{x}_k\)` &amp;emsp; `\(F=G + Z\hat{P}_kZ^\top\)`
-
-Calculate error <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#8BC1FA;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#6495ed;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> `\(v = y_k - \hat{y}_k\)` &amp;emsp; `\(K = \hat{P}_kZ^\top F^{-1}\)`
-
-Update <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#8BC1FA;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#6495ed;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> `\(x_k = \hat{x}_k + Kv\)` &amp;emsp; `\(P_k = \hat{P}_k(I - Z^\top K)\)`
-
-Log Likelihood <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#8BC1FA;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#6495ed;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> `\(\ell_k(\theta) \propto \ell_{k-1}(\theta) - v^\top F^{-1} v - \log(|F|)\)`
-
-???
-
-If know S, then that pins down all the parameter matrices
-
-Loop this over 1 ... n
-
-Maximize over theta
 
 
----
 
 ## We don't know the discrete states
 
@@ -597,17 +648,16 @@ Piece has 231 notes
 
 ???
 
-This is a greedy approximation
+* This is a greedy approximation
+* AKA "Beam Search"
+* The sampling step is important
+* Probability of sampling is proportional to current weight times likelihood times trans prob
+* Example supposing J = 5
 
-The sampling step is important
-
-Probability of sampling is proportional to current weight times likelihood times trans prob
-
-Example supposing J = 5
 
 ---
 
-## The complete algorithm
+## The complete procedure
 
 For each performance:
 
@@ -623,11 +673,9 @@ For each performance:
 
 ???
 
-kfilter() 1 step appears in dpf()
-
-ksmoother() is conditional on all the data
-
-Takes a few minutes per performance when 4 is done intelligently
+* kfilter() 1 step appears in dpf()
+* ksmoother() is conditional on all the data
+* Takes a few minutes per performance when 4 is done intelligently
 
 
 ---
@@ -651,7 +699,9 @@ For each performance, we estimate `\(\theta\)` by penalized maximum likelihood.
 The parameters are things like:
 
   - average speed in different states
+  
   - some variance parameters
+  
   - transition probabilities
   
 We have strong prior information.
@@ -685,13 +735,19 @@ Examples of strong priors
 
 .pull-right[
 
-&lt;img src="gfx/parametric-clusters-1.svg" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="gfx/parametric-clusters-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 
 ]
 
 ---
 
-&lt;img src="gfx/other-removed-1.svg" width="60%" style="display: block; margin: auto;" /&gt;
+&lt;img src="gfx/good-clusters.png" width="705px" height="600px" style="display: block; margin: auto;" /&gt;
+
+
+
+
+
+
 
 ---
 
@@ -723,6 +779,15 @@ class: middle
 
 &lt;img src="gfx/cortot-performance-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
 
+???
+
+* Not actually Cortot
+* Likely Hatto or perhaps even an engineered recording
+* This was a major scandal for the British record label in about 2008
+* Lots of other faked recordings
+* Discovered by uploading to iTunes, gave it the wrong album cover
+
+
 ---
 
 
@@ -738,6 +803,13 @@ class: middle
 
 * We use the learned representations to compare and contrast recordings 
 
+--
+
+### Future work 
+
+* Similar model for dynamics
+* Can we do this fast and "online"?
+* Use it for teaching?
 
 
 ---
@@ -763,6 +835,41 @@ class: middle
 &lt;img src="gfx/nsf-logo.png" height="100px" align="left" hspace=5%&gt;
 &lt;img src="https://www.nserc-crsng.gc.ca/img/logos/img-logo2-en.png" height="100px" align="right" hspace=5%&gt;
 ]
+
+---
+class: inverse, middle, center
+
+# Appendix
+
+---
+
+## 1-step Kalman filter &amp;mdash; .secondary[kalman()]
+
+Get estimates of `\(X_{k}\)` given a new observation `\(y_k\)`
+
+Input: 
+  * New data &amp;mdash; `\(y_k\)`, 
+  * Parameter matrices &amp;mdash; `\(d_k\)`, `\(c_k\)`, `\(T_k\)`, `\(Z_k\)`, `\(Q_k\)`, `\(G_k\)`, 
+  * Previous state mean and variance &amp;mdash; `\(x_{k-1}\)`, `\(P_{k-1}\)`
+
+Predict new state <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#8BC1FA;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#6495ed;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> `\(\hat{x}_k = d + Tx_{k-1}\)` &amp;emsp; `\(\hat{P}_k = Q+TP_{k-1}T^\top\)`
+
+Predict current data <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#8BC1FA;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#6495ed;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> `\(\hat{y}_k = c + Z\hat{x}_k\)` &amp;emsp; `\(F=G + Z\hat{P}_kZ^\top\)`
+
+Calculate error <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#8BC1FA;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#6495ed;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> `\(v = y_k - \hat{y}_k\)` &amp;emsp; `\(K = \hat{P}_kZ^\top F^{-1}\)`
+
+Update <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#8BC1FA;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#6495ed;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> `\(x_k = \hat{x}_k + Kv\)` &amp;emsp; `\(P_k = \hat{P}_k(I - Z^\top K)\)`
+
+Log Likelihood <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#8BC1FA;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#6495ed;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> <svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M504.3 273.6l-112.1 104c-6.992 6.484-17.18 8.218-25.94 4.406c-8.758-3.812-14.42-12.45-14.42-21.1L351.9 288H32C14.33 288 .0002 273.7 .0002 255.1S14.33 224 32 224h319.9l0-72c0-9.547 5.66-18.19 14.42-22c8.754-3.809 18.95-2.075 25.94 4.41l112.1 104C514.6 247.9 514.6 264.1 504.3 273.6z"/></svg> `\(\ell_k(\theta) \propto \ell_{k-1}(\theta) - v^\top F^{-1} v - \log(|F|)\)`
+
+???
+
+If know S, then that pins down all the parameter matrices
+
+Loop this over 1 ... n
+
+Maximize over theta
+
 
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
