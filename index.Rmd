@@ -483,8 +483,7 @@ tempos %>% select(-meas_num,-beat) %>%
 
 * Note the shaded region
 
----
-class: middle
+
 
 ```{r all-perfs}
 plots = vector("list", 4)
@@ -515,10 +514,10 @@ perfcols = viridis_pal(begin=.2)(nlevels(plots$state))
 # deunderscore = function(x) gsub('_',' ',x)
 ```
 
-```{r example-perf,fig.height=6,fig.width=10}
+```{r example-perf,fig.height=6,fig.width=10, include=FALSE}
 perfshapes = c(20, 17, 18, 8)
 plots = plots %>% mutate(performer, performer = sub('_',' ',performer))
-ggplot(filter(plots, performer == 'Richter 1976')) + 
+grichter <- ggplot(filter(plots, performer == 'Richter 1976')) + 
   geom_rect(data=data.frame(xmin = 33, xmax = 45, ymin = -Inf, ymax = Inf),
               aes(xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax),
               fill = 'gray90', color = 'gray90') +
@@ -598,7 +597,73 @@ background-size: contain
 * Repetition
 * Chord progression
 
+---
 
+## Previous analysis
+
+Nicholas Cook, Craig Sapp, and Andrew Earis at CHARM
+
+Among other things, examines correlations between tempo curves
+
+.pull-left[
+
+.secondary[Richter 1976]
+.center[
+![:scale 66%](http://www.mazurka.org.uk/ana/pcor/mazurka68-3-s50/Richter1976-tn.png)
+]]
+
+.pull-right[
+.secondary[Cortot 1951]
+.center[
+![:scale 66%](http://www.mazurka.org.uk/ana/pcor/mazurka68-3-s50/Cortot1951-tn.png)
+]]
+
+---
+
+## Tempos and smoothing
+
+* Most statistical methods for estimating functions assume "smoothness"
+
+* Splines, wavelets, trend filtering
+
+
+```{r alternative-smoothers, fig.height=4}
+library(splines)
+nsplines = 64 # 1 knot per bar plus boundary
+B = bs(tempos$note_onset, df=32, intercept = TRUE)
+single.knots = match(seq(4,56,by=4)+1,tempos$meas_num)
+double.knots = match(c(16,24,32,44)+1, tempos$meas_num)
+triple.knots = match(c(16,24,32,44)+1, tempos$meas_num)
+quad.knots = match(c(16,24,32,44)+1, tempos$meas_num)
+all.knots = tempos$note_onset[
+  sort(c(single.knots,double.knots,triple.knots,quad.knots))]
+B1 = bs(tempos$note_onset, knots = all.knots, intercept = TRUE,Boundary.knots = c(1,61))
+
+spline_music = plots %>% group_by(performer) %>% 
+  mutate(preds_smooth = fitted(lm(tempo~B-1)), 
+         preds_music = fitted(lm(tempo~B1-1)))
+filter(spline_music , performer %in% c('Richter 1976')) %>%
+  gather(key='key',value = 'value', -tempo, 
+         -measure, -state, -performer) %>%
+  ggplot() + th +
+  geom_rect(data=data.frame(xmin = 33, xmax = 45, ymin = -Inf, ymax = Inf),
+              aes(xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax),
+              fill = 'gray90', color = 'gray90', show.legend = FALSE) +
+  geom_point(aes(x=measure, y=tempo), color='gray40', show.legend = FALSE) +
+  geom_line(aes(x=measure, y=value, color=key), size=1) + 
+  scale_color_brewer(palette = "Dark2",
+                        labels=c('music model','musical spline','regression spline')) +
+  theme(legend.position = 'bottom', legend.title = element_blank(),
+        strip.text = element_text(hjust = 0)) +
+  facet_wrap(~performer,nrow=2) #+
+```
+
+---
+class: center, middle
+
+```{r, fig.height=6, fig.width=10}
+grichter
+```
 
 
 ---
