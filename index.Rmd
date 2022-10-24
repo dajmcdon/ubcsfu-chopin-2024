@@ -61,6 +61,11 @@ style_duo_accent(
   outfile = here::here("src/xaringan-themer.css")
 )
 # theme_set(theme_xaringan())
+xaringanExtra::use_scribble(
+  pen_color = secondary,
+  palette = c(primary, secondary, tertiary, fourth_color, 
+              RColorBrewer::brewer.pal(6, "Set1"))
+)
 ```
 
 ```{r cover, include=FALSE, fig.width = 16, fig.height = 4}
@@ -164,17 +169,19 @@ background-size: contain
 * IU happened to have an opening
 * Met Prof. Chris Raphael at my interview
 * Accepted the Job
-* Occasionally dabbled in Music on the Side
-* First invited talk at Laval on Music
-* Finally published the paper in 2021
-* First in-person talk post-pandemic
-* Seemed more fun than talking about all the COVID modelling or riveting stat theory
 
 
 ---
 background-image: url("https://img.freepik.com/free-vector/musical-pentagram-sound-waves-notes-background_1017-33911.jpg?w=1800&t=st=1666393969~exp=1666394569~hmac=2bd5438306b82462af3c31fb52c733010cd2f8ff069fcba5324d16a25638af2f")
 background-size: contain
 
+???
+
+* Occasionally dabbled in Music on the Side
+* First invited talk at Laval on Music
+* Finally published the paper in 2021
+* First in-person talk post-pandemic
+* Seemed more fun than talking about all the COVID modelling or riveting stat theory
 
 
 ---
@@ -376,6 +383,13 @@ ggplot(tempos, aes(x=note_onset, y=Rubinstein_1961)) +
 
 * Speed is important for .tertiary[.bold[interpretation]]
 
+???
+
+* Orange is Rubinstein, as recorded
+* Dashed is "mine", mechanically forced Rubinstein to be constant speed
+* Mention axes
+* Note the "slow down" at the end (phrase boundary)
+
 ---
 class: inverse, center, middle
 
@@ -386,6 +400,13 @@ class: inverse, center, middle
 ---
 
 ## Important musical terms
+
+
+
+```{r score-bit, out.width="60%"}
+include_graphics("gfx/ChopinFirst3.jpeg")
+```
+
 
 .pull-left-narrow[
 ### Notes
@@ -415,10 +436,12 @@ The prevailing speed, measured in bpm
 Loudness of the note
 ]
 
+???
 
-```{r score-bit, out.width="60%"}
-include_graphics("gfx/ChopinFirst3.jpeg")
-```
+* notes indicate pitch and relative duration
+* (relative to...) beat is the baseline
+* accents / pedal markings
+
 
 ---
 
@@ -455,6 +478,10 @@ tempos %>% select(-meas_num,-beat) %>%
   ylab("tempo (bpm)") + xlab("measure") + 
   theme(legend.position = "none")
 ```
+
+???
+
+* Note the shaded region
 
 ---
 class: middle
@@ -510,7 +537,7 @@ ggplot(filter(plots, performer == 'Richter 1976')) +
 ## Chopin & Mazurkas
 
 .pull-left[
-#### Fryderyk Chopin (1810&ndash;1849)
+.secondary.large[Fryderyk Chopin (1810&ndash;1849)]
 
 * Born in Poland
 
@@ -522,7 +549,7 @@ ggplot(filter(plots, performer == 'Richter 1976')) +
 ]
 
 .pull-right[
-#### Mazurka
+.secondary.large[Mazurka]
 
 * A Polish dance
 
@@ -563,19 +590,13 @@ background-size: contain
 
 ???
 
-Recording by Christoph Zbinden, available from the IMSLP under CC By 4.0.
-
-Tempo markings, importantly, only 2 + rit and fermata
-
-Dotted eighth sixteenth
-
-ABA structure
-
-Minor phrases
-
-Repetition
-
-Chord progression
+* Recording by Christoph Zbinden, available from the IMSLP under CC By 4.0.
+* Tempo markings, importantly, only 2 + rit and fermata
+* Dotted eighth sixteenth
+* ABA structure
+* Minor phrases
+* Repetition
+* Chord progression
 
 
 
@@ -646,7 +667,7 @@ include_graphics("gfx/markov-trans.svg")
 
 ## Intentions vs. observations
 
-```{r ss-mod,out.width="80%"}
+```{r ss-mod, out.width="75%"}
 include_graphics("gfx/ss-mod-flow.svg")
 ```
 
@@ -658,6 +679,40 @@ include_graphics("gfx/ss-mod-flow.svg")
 * Need to track tempo/accel in $X_k$.
 * These depend on $S_k$ and $S_{k-1}$
 * Observe noisy realization
+
+---
+
+## Kalman filter
+
+.pull-left[* Developed in the late 1950s to track missiles]
+
+$$
+\begin{aligned}
+X_{k+1} &= d_k + T_k X_k + \eta_{k+1} & \eta_{k+1} &\sim \textrm{N}(0, Q_{k+1})\\
+Y_k &= c_k + Z_k X_k + \epsilon_{k}&\epsilon_k & \sim \textrm{N}(0, G_k)\\
+\end{aligned}
+$$
+
+.pull-left[
+* Assume $X_0$ is Gaussian
+
+* Just track mean and variance of $X_k\ |\ \{Y_i\}_{i=1}^k$
+
+* Does this iteratively for each $k$
+
+* Gives "filter" estimate of $\{X_k\}_{k=1}^n$ and likelihood
+
+* Matrices can depend on parameters $\theta$ 
+
+* or on previous $X$ / $Y$
+]
+
+.pull-right[
+![](https://assets.bwbx.io/images/users/iqjWHBFdfxIU/iEmS3Tk.cj8U/v0/1400x-1.jpg)
+
+.tiny[Photographer: Anas Baba/AFP/Getty Images]
+]
+
 
 
 ---
@@ -696,35 +751,6 @@ But how do we estimate all of it? &mdash; both unknown is $O(b^n)$ for each like
 --
 
 .secondary[This is a problem]
-
----
-
-## Kalman filter
-
-.pull-left[* Developed in the late 1950s to track missiles]
-
-$$
-\begin{aligned}
-X_{k+1} &= d_k + T_k X_k + \eta_{k+1} & \eta_{k+1} &\sim \textrm{N}(0, Q_{k+1})\\
-Y_k &= c_k + Z_k X_k + \epsilon_{k}&\epsilon_k & \sim \textrm{N}(0, G_k)\\
-\end{aligned}
-$$
-
-.pull-left[
-* Assume $X_0$ is Gaussian
-
-* Just track mean and variance of $X_k\ |\ \{Y_i\}_{i=1}^k$
-
-* Does this iteratively for each $k$
-
-* Gives "filter" estimate of $\{X_k\}_{k=1}^n$ and likelihood
-]
-
-.pull-right[
-![](https://assets.bwbx.io/images/users/iqjWHBFdfxIU/iEmS3Tk.cj8U/v0/1400x-1.jpg)
-
-.tiny[Photographer: Anas Baba/AFP/Getty Images]
-]
 
 
 ---
@@ -885,21 +911,35 @@ collapsibleTree(const, fill = "fill", fontSize = 16, collapsed = TRUE)
 
 For each performance:
 
-1. Guess a parameter vector $\theta$ (in some sensible way)
+* Iterate 1&mdash;3 to maximize for $\theta \in \Theta$, produce $\widehat\theta$
 
-2. .secondary[dpf()] gives greedy state sequence $\{\hat{S}_k\}_{k=1}^n$
+  1. Guess a parameter vector $\theta$ (in some sensible way)
 
-3. It gives the likelihood as a side effect via .secondary[kfilter()]
+  2. .secondary[dpf()] gives greedy state sequence $\{\widehat{S}_k\}_{k=1}^n$
 
-4. Iterate 1&ndash;3 to maximize for $\theta \in \Theta$
+  3. It gives the likelihood as a side effect via .secondary[kfilter()]
 
-5. Run the .secondary[ksmoother()] to get estimate for $\{X_k\}_{k=1}^n$
+
+* Rerun .secondary[dpf()] and .secondary[ksmoother()] at $\widehat{\theta}$ to get $\{\widehat{S}_k\}_{k=1}^n$ and $\{\widehat{X}_k\}_{k=1}^n$
 
 ???
 
-* kfilter() 1 step appears in dpf()
+* 1-step kfilter() step appears in dpf()
 * ksmoother() is conditional on all the data
+
+
+--
+
+ ---
+
+<br/> 
+ 
+![:scale 50%](https://alliancecan.ca/themes/custom/site_theme/logo.svg)
+
+???
+
 * Takes a few minutes per performance when 4 is done intelligently
+* I used 6hr walltime on Cedar with 1 perf / core and 10 restarts
 
 
 ---
@@ -1242,9 +1282,10 @@ ggplot(filter(plots, performer == 'Cortot 1951')) +
 
 * Not actually Cortot
 * Likely Hatto or perhaps even an engineered recording
-* This was a major scandal for the British record label in about 2008
-* Lots of other faked recordings
-* Discovered by uploading to iTunes, gave it the wrong album cover
+* This was a major scandal for the British Concert Artist record label in about 2006/7
+* ~100 other fake recordings 
+* Discovered by uploading to Gracenote database
+
 
 
 ---
