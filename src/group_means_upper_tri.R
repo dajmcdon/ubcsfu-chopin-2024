@@ -21,3 +21,25 @@ group_means_upper_tri <- function(mat, gr, diag_vals = NA) {
   diag(lt) <- diag_vals
   lt
 }
+
+othercut = .35
+subs = apply(hc_parm, 1, quantile, probs = 4/46) < othercut
+sDmat = hc_parm[subs,subs]
+sdends = sDmat %>% as.dist %>% hclust %>% as.dendrogram
+nclusts = 4
+colorthem = TRUE
+rind1 <- order.dendrogram(dend_parm)
+mat <- hc_parm[rind1, rind1]
+main_clusts <- cutree(as.hclust(sdends), k = nclusts)
+pos <- match(names(main_clusts), rownames(mat))
+all_clusts <- rep(5L, nrow(hc_parm))
+all_clusts[pos] <- main_clusts
+rind <- sort.int(all_clusts, index.return = TRUE)
+mat2 <- mat[rind$ix, rind$ix]
+
+m <- group_means_upper_tri(sqrt(mat2), rind$x)
+rownames(m) <- NULL
+colnames(m) <- NULL
+m <- reshape2::melt(t(m[46:1,]), na.rm = TRUE)
+sply <- 46 - cumsum(rle(rind$x)$lengths)[1:4] + .5
+splx <- cumsum(rle(rind$x)$lengths)[1:4] + .5
