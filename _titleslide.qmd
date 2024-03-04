@@ -1,0 +1,95 @@
+---
+---
+
+
+```{r setup}
+#| include: false
+primary = "#002145"
+secondary = "#6495ed"
+tertiary = "#ffa319"
+fourth_color = "#DB0B5B"
+suppressMessages(library(tidyverse))
+theme_set(theme_bw())
+lighten_colour <- function(color_hex, strength = 0.7) {
+  stopifnot(strength >= 0 && strength <= 1)
+  color_rgb <- col2rgb(color_hex)[, 1]
+  color_rgb <- (1 - strength) * color_rgb + strength * 255
+  rgb(color_rgb[1], color_rgb[2], color_rgb[3], maxColorValue = 255)
+}
+```
+
+```{r}
+#| include: false
+#| label: cover-art
+#| fig-width: 8
+#| fig-height: 4.5
+library(dpf)
+data(tempos)
+pvec_ml <- read_rds("data/pvec_ml.rds") |>
+  select(-value,-fevals,-gevals,-convergence) |>
+  data.matrix() |> 
+  data.frame()
+source("src/dirichlet_precision.R")
+cols <- RColorBrewer::brewer.pal(9, "Blues")
+tempos |>
+  select(-meas_num, -beat) |>
+  pivot_longer(-note_onset) |>
+  ggplot() +
+  # annotate("rect",
+  #   xmin = 33, xmax = 45, ymin = -Inf, ymax = Inf,
+  #   fill = lighten_colour(primary, .8)
+  # ) +
+  geom_line(aes(y = value, x = note_onset, color = name)) +
+  coord_cartesian(xlim = c(2, 44)) +
+  scale_x_continuous(expand = expansion()) +
+  scale_y_continuous(expand = expansion()) +
+  theme_void() +
+  scale_colour_manual(values = rep(cols, length.out = ncol(tempos) - 3)) +
+  # scale_color_brewer(palette = "Blues") +
+  theme(legend.position = "none")
+```
+
+
+
+
+## {{< meta talk-title >}} {background-image="gfx/cover-art-1.svg" background-opacity="0.5" .f1}
+
+### {{< meta talk-subtitle >}}
+
+<br>
+
+#### {{< meta author >}} 
+{{< meta other-authors >}}
+
+{{< meta talk-date >}}
+
+
+```{r qrcodes, include=FALSE, fig.width=6, fig.height=2, dev="png"}
+qrdat <- function(text, ecl = c("L", "M", "Q", "H")) {
+  x <- qrcode::qr_code(text, ecl)
+  n <- nrow(x)
+  s <- seq_len(n)
+  tib <- tidyr::expand_grid(x = s, y = rev(s))
+  tib$z <- c(x)
+  tib
+}
+
+allqr <- bind_rows(
+  slides = qrdat("https://dajmcdon.github.io/ubcsfu-chopin-2024/"),
+  paper = qrdat("http://dx.doi.org/10.1214/21-AOAS1457"), 
+  `my www` = qrdat("https://dajmcdon.github.io", "Q"), .id = "site")
+
+ggplot(allqr, aes(x, y, fill = z)) +
+  geom_raster() +
+  coord_equal(expand = FALSE) +
+  scale_fill_manual(values = c("white", primary), guide = "none") +
+  theme_void() +
+  facet_wrap(~ site, nrow = 1) +
+  theme(
+    text = element_text(
+      color = tertiary, size = 18,
+      margin = margin(3,0,3,0)),
+    panel.background = element_blank(),
+    plot.background = element_blank())
+```
+
