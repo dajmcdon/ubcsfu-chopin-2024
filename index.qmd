@@ -1,0 +1,1092 @@
+---
+talk-title: "Markov Switching State-Space Models"
+talk-short-title: "Markov Models for Music"
+talk-subtitle: "for Uncovering Musical Interpretation"
+author: "Daniel J. McDonald"
+other-authors: "UBC/SFU Student Seminar Series"
+repo-address: "dajmcdon/ubcsfu-chopin-2024"
+talk-date: |
+  | [9 March 2024]{.tertiary}
+  | <https://dajmcdon.github.io/ubcsfu-chopin-2024/>
+format: revealjs
+---
+
+{{< include _titleslide.qmd >}}
+
+## {background-image="gfx/State-cello-0299.jpg" background-size="contain"}
+
+## {background-image="gfx/jacobs.jpg" background-size="contain"}
+
+::: notes
+
+* Dabbled in Economics
+* PhD is Statistics
+* IU happened to have an opening
+* Met Prof. Chris Raphael at my interview
+* Accepted the Job
+
+:::
+
+## {background-image="https://img.freepik.com/free-vector/musical-pentagram-sound-waves-notes-background_1017-33911.jpg?w=1800&t=st=1666393969~exp=1666394569~hmac=2bd5438306b82462af3c31fb52c733010cd2f8ff069fcba5324d16a25638af2f" background-size=contain}
+
+::: notes
+
+* Occasionally dabbled in Music on the Side
+* First invited talk at Laval on Music
+* Finally published the paper in 2021
+
+:::
+
+
+## Musical taste
+
+::: flex
+
+::: w-60
+* Easy to describe music you like:
+  - "Jazzy sound"
+  
+  - "Strong beat"
+  
+  - "good lyrics"
+  
+  - "anything by Taylor Swift"
+:::
+
+::: w-40
+
+<iframe src="https://gifer.com/embed/22H" width=480 height=368.640 frameBorder="0" allowFullScreen></iframe>
+  
+:::
+:::
+
+::: fragment
+
+* Harder to describe a [performance]{.tertiary}
+
+* Classical music is mainly about performances of the [same]{.tertiary} music
+
+* How do we think about which ones we like?
+
+:::
+
+
+## Primer on "classical" music
+
+* Written between 6th century and today
+* Includes music written during the Classical period (1750&ndash;1820)
+
+::: {.callout-warning appearance="minimal"}
+The real difference is that when a composer writes a piece of what’s usually called classical music, he puts down the exact notes that he wants, the exact instruments or voices that he wants to play or sing those notes—even the exact number of instruments or voices; and he also writes down as many directions as he can think of. 
+
+[&ndash;Leonard Bernstein]{.secondary}
+:::
+
+* Generally much more musically complicated  
+
+<div class=tc>
+
+![](gfx/hey-jude-single.jpeg){width="150px"}
+
+<audio controls>
+<source src="gfx/hey-jude-clip.m4a">
+</audio>
+
+</div>
+
+::: notes
+
+* Musically complicated = wider range of chords, keys, instrumentation, contrasts
+* Hey Jude: 3 chords (2 others briefly) in 7 minutes. Same key the whole time.
+* For today, Chopin is running example
+* Chopin: 6 unique chords in first 10 seconds. Two key areas in 1.5 minutes of music.
+
+:::
+
+---
+
+<div class="flex">
+<div class="w-50 tc">
+![](gfx/me.jpg){height="500px"}
+
+<audio controls>
+<source src="gfx/RubinsteinFlatTempo.m4a">
+</audio>
+</div>
+  
+<div class="w-50 tc">
+![](gfx/rubin.jpg){height="500px"}
+
+<audio controls>
+<source src="gfx/Rubinstein.m4a">
+</audio>
+</div>
+</div>
+
+::: notes
+* Which do you prefer?
+:::
+
+## What's different?
+
+::: flex
+
+::: w-50
+1. Mistakes
+1. Extraneous noise
+1. Recording quality
+1. Articulation / Legato / Bowing / Breathing
+1. Dynamics
+1. Tempo / Rubato
+:::
+
+::: w-50
+
+
+![Source: WBUR Boston](https://media.wbur.org/wp/2019/04/gustavo-dudamel.jpg)
+
+:::
+:::
+
+::: notes
+The first three are uninteresting.
+
+The others are about _interpretation_
+
+We like performances with "better" interpretations
+:::
+
+## {background-image=https://www.worldpianonews.com/wp-content/uploads/2020/05/Bosendorfer-280VC-custom4_Post-scaled.jpg background-size=cover}
+
+
+::: notes
+
+Piano music
+
+* Simplifies the problem
+  - No bowing, fingering, breathing, glissando
+* Focus on __tempo__ 
+* professional pianists would cringe as I say this, but contrast with strings / winds / singers
+
+:::
+
+
+```{r more-set-up, echo=FALSE, message=FALSE, warning=FALSE}
+library(knitr)
+library(splines)
+library(gplots)
+library(heatmaply)
+library(RColorBrewer)
+library(dendextend)
+green <- '#00884E'
+blue <- primary
+orange <- tertiary
+db <- primary
+data(tempos)
+lt <- diff(c(tempos$note.onset,61))
+fivecolors = c('#7b3294','#c2a5cf','#a6dba0','#008837','#e7d4e8')
+```
+
+
+## Musical tempo
+
+```{r rubinstein-tempo}
+#| fig-height: 3
+#| fig-width: 6
+ggplot(tempos, aes(x = note_onset, y = Rubinstein_1961)) +
+  geom_line(color = tertiary, linewidth = 2) +
+  ylab("tempo (bpm)") +
+  xlab("measure") +
+  scale_x_continuous(breaks = 1:4 * 2) +
+  # geom_vline(xintercept = c(1,8.9,9)) +
+  coord_cartesian(xlim = c(1, 9), expand = FALSE) +
+  geom_hline(yintercept = 132, color = primary, linewidth = 2)
+```
+
+* Notes change speed
+
+* Sometimes purposeful
+
+* Speed is important for [interpretation]{.tertiary}
+
+::: notes
+
+* Orange is Rubinstein, as recorded
+* Dashed is "mine", mechanically forced Rubinstein to be constant speed
+* Mention axes
+* Note the "slow down" at the end (phrase boundary)
+
+:::
+
+# What is this "music"?
+
+## Important musical terms
+
+![](gfx/ChopinFirst3.jpeg){height=300px}
+
+
+::: flex
+
+::: {.w-20 .tr}
+
+[Notes]{.tertiary}
+
+[Beat]{.tertiary}
+
+[Measure]{.tertiary}
+
+[Time signature]{.tertiary}
+
+[Tempo]{.tertiary}
+
+[Dynamics]{.tertiary}
+
+:::
+
+::: w-80
+All those little black dots  
+
+Strongly felt impetus 
+
+Collections of notes delimited by vertical "barlines" 
+
+Number of beats / measure; type of note that gets the beat  
+
+The prevailing speed, measured in bpm  
+
+Loudness of the note
+:::
+:::
+
+::: notes
+
+* notes indicate pitch and relative duration
+* (relative to...) beat is the baseline
+* accents / pedal markings
+
+:::
+
+## Data
+
+* CHARM Mazurka Project
+
+
+![](gfx/charm.png){height=300px}
+
+
+* Focus on timing only (dynamics also available)
+
+* 50 recordings: Chopin Mazurka Op. 68 No. 3
+
+* Recorded between 1931 and 2006
+
+* 45 different performers
+
+##
+
+```{r all-performance-lines}
+#| cache: true
+source("src/build-all-plots.R")
+tempos %>%
+  select(-meas_num, -beat) %>%
+  pivot_longer(-note_onset) %>%
+  ggplot() +
+  annotate(
+    "rect", xmin = 33, xmax = 45, ymin = -Inf, ymax = Inf,
+    fill = "gray90", color = "gray90"
+  ) +
+  geom_line(aes(y = value, x = note_onset, color = name)) +
+  scale_y_continuous(expand = expansion(c(0, 0.05))) +
+  scale_x_continuous(expand = expansion()) +
+  scale_color_manual(values = rep(fivecolors, length.out = nrow(pvec_ml))) +
+  ylab("tempo (bpm)") +
+  xlab("measure") +
+  theme(legend.position = "none")
+```
+
+::: notes
+
+* Note the shaded region
+
+:::
+
+
+## Chopin & Mazurkas
+
+::: flex
+
+::: w-50
+
+[Fryderyk Chopin (1810&ndash;1849)]{.tertiary}
+
+* Born in Poland
+
+* Moved to Paris at 21
+
+* Virtuoso pianist
+
+* Wrote mainly piano music
+
+:::
+
+::: w-50
+
+[Mazurka]{.tertiary}
+
+* A Polish dance
+
+* Chopin composed at least 58 for Piano
+
+* Repetition is very important
+
+* Certain rhythmic figures
+
+:::
+
+:::
+
+![](gfx/mazurka-dance.jpeg){fig-align=center}
+
+::: notes
+Everything he wrote includes piano
+:::
+
+## {background-image="gfx/entire-mazurka.jpg" background-size=contain}
+
+<div class=tc>
+<audio controls>
+<source src="gfx/IMSLP365286-PMLP02288-Mazurka_F-Dur_Op_68_Nr_3.mp3">
+</audio>
+</div>
+
+
+::: notes
+* Recording by Christoph Zbinden, available from the IMSLP under CC By 4.0.
+* Tempo markings, importantly, only 2 + rit and fermata
+* Dotted eighth sixteenth
+* ABA structure
+* Minor phrases
+* Repetition
+* Chord progression
+
+:::
+
+## Previous analysis
+
+Nicholas Cook, Craig Sapp, and Andrew Earis at CHARM
+
+Among other things, examines correlations between tempo curves
+
+::: flex
+::: w-50
+
+[Richter 1976]{.secondary}
+
+![](http://www.mazurka.org.uk/ana/pcor/mazurka68-3-s50/Richter1976-tn.png){fig-align=center width="400px"}
+
+:::
+
+::: w-50
+[Cortot 1951]{.secondary}
+
+![](http://www.mazurka.org.uk/ana/pcor/mazurka68-3-s50/Cortot1951-tn.png){fig-align="center" width="400px"}
+
+:::
+
+:::
+
+## Tempos and smoothing
+
+* Most statistical methods for estimating functions assume "smoothness"
+
+* Splines, wavelets, trend filtering
+
+```{r alternative-smoothers}
+#| cache: true
+#| fig-width: 7
+#| fig-height: 3
+library(splines)
+nsplines <- 64 # 1 knot per bar plus boundary
+B <- bs(tempos$note_onset, df = 32, intercept = TRUE)
+single.knots <- match(seq(4, 56, by = 4) + 1, tempos$meas_num)
+double.knots <- match(c(16, 24, 32, 44) + 1, tempos$meas_num)
+triple.knots <- match(c(16, 24, 32, 44) + 1, tempos$meas_num)
+quad.knots <- match(c(16, 24, 32, 44) + 1, tempos$meas_num)
+all.knots <- tempos$note_onset[
+  sort(c(single.knots, double.knots, triple.knots, quad.knots))
+]
+B1 <- bs(tempos$note_onset, knots = all.knots, intercept = TRUE, Boundary.knots = c(1, 61))
+
+spline_music <- plots |>
+  group_by(performer) |>
+  mutate(
+    preds_smooth = fitted(lm(tempo ~ B - 1)),
+    preds_music = fitted(lm(tempo ~ B1 - 1))
+  )
+
+spline_music |>
+  filter(performer == "Richter 1976") |>
+  pivot_longer(c(inferred, preds_smooth, preds_music)) |>
+  ggplot() +
+  annotate("rect",
+    xmin = 33, xmax = 45, ymin = -Inf, ymax = Inf,
+    fill = "gray90", color = "gray90"
+  ) +
+  geom_point(aes(x = measure, y = tempo), color = "gray40", show.legend = FALSE) +
+  geom_line(aes(x = measure, y = value, color = name), linewidth = 1) +
+  scale_color_brewer(
+    palette = "Dark2",
+    labels = c("music model", "musical spline", "regression spline")
+  ) +
+  scale_x_continuous(expand = expansion()) +
+  theme(
+    legend.position = c(.15, .8), 
+    legend.title = element_blank(),
+    legend.background = element_blank(),
+    legend.key = element_blank(),
+    strip.text = element_text(hjust = 0)
+  ) +
+  facet_wrap(~performer, nrow = 2)
+```
+
+##
+
+```{r richter}
+#| fig-width: 8
+#| fig-height: 4.5
+grichter + 
+  theme(strip.text = element_text(hjust = 0), legend.title = element_blank())
+```
+
+# Switching Kalman Filter
+
+## Thinking about tempo
+
+
+::: flex
+::: w-50
+
+<br/>
+
+### 1. Playing in tempo
+
+<br/>
+
+### 2. Accelerando (speed up)
+
+<br/>
+
+### 3. Allargando (slow down)
+
+<br/>
+
+### 4. Tenuto (emphasis)
+
+:::
+
+::: w-50
+![](https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Metronome_Mälzel_1.jpg/291px-Metronome_Mälzel_1.jpg){fig-align="center"}
+:::
+
+:::
+
+## Transition diagram
+
+
+::: flex
+
+::: w-70
+
+```{r}
+#| out-width: "850px"
+#| label: markov-trans
+include_graphics("gfx/markov-trans.svg")
+```
+
+:::
+
+::: w-30
+
+[1. Constant tempo]{.const .f1}
+
+<br/>
+
+[2. Speeding up]{.accel .f1}
+
+<br/>
+
+[3. Slowing down]{.decel .f1}
+
+<br/>
+
+[4. Emphasis]{.stress .f1}
+
+:::
+:::
+
+## Intentions vs. observations
+
+```{r ss-mod, out.width="75%"}
+include_graphics("gfx/ss-mod-flow.svg")
+```
+
+::: notes
+* Musicians aren't perfect.
+* Imagine a speed that they'll maintain in CT state.
+* Accelerate/Decel from there.
+* Need to track tempo/accel in $X_k$.
+* These depend on $S_k$ and $S_{k-1}$
+* Observe noisy realization
+:::
+
+## Kalman filter
+
+
+* Developed in the late 1950s to track missiles
+
+$$
+\begin{aligned}
+X_{k+1} &= d_k + T_k X_k + \eta_{k+1} & \eta_{k+1} &\sim \textrm{N}(0, Q_{k+1})\\
+Y_k &= c_k + Z_k X_k + \epsilon_{k}&\epsilon_k & \sim \textrm{N}(0, G_k)\\
+\end{aligned}
+$$
+
+::: flex
+::: w-50
+
+* Assume $X_0$ is Gaussian
+
+* Just track mean and variance of $X_k\ |\ \{Y_i\}_{i=1}^k$
+
+* Does this iteratively for each $k$
+
+* Gives "filter" estimate of $\{X_k\}_{k=1}^n$ and likelihood
+
+* Matrices can depend on parameters $\theta$ 
+
+* or on previous $X$ / $Y$
+
+:::
+::: w-50
+
+![Photographer: Anas Baba/AFP/Getty Images](https://assets.bwbx.io/images/users/iqjWHBFdfxIU/iEmS3Tk.cj8U/v0/1400x-1.jpg){height="400px"}
+
+:::
+:::
+
+
+## Inference
+
+```{r load-fa}
+library(fontawesome)
+```
+
+
+::: {.callout-important icon=false}
+## We want to estimate 
+ 
+1. parameters $\theta$ &mdash; transition probabilities, mean tempos, variances
+1. hidden states $S_k$ 
+1. hidden states $X_k$
+:::
+
+
+Given $\{S_k\}_{k=1}^n$ and $\theta$  `r fa("right-long", fill="#8BC1FA")` 
+`r fa("right-long", fill=secondary)` `r fa("right-long")` 
+[Kalman filter]{.secondary} gives $\{\widehat{X}_k\}_{k=1}^n$ in $O(n)$ time
+
+
+Given $\{X_k\}_{k=1}^n$ and $\theta$ `r fa("right-long", fill="#8BC1FA")` 
+`r fa("right-long", fill=secondary)` `r fa("right-long")` 
+[Viterbi algorithm]{.tertiary} gives $\{\widehat{S}_k\}_{k=1}^n$ in $O(n)$ time
+
+
+::: {.callout-note icon=false}
+## But how do we estimate all of it? 
+
+both unknown requires $O(b^n)$ time
+:::
+
+
+::: notes
+* Evaluating the likelihood for one $\theta$ is exponential in \# of notes.
+* Non-convex to optimize over both.
+:::
+
+
+## Switching Kalman filter (for our model)
+
+<br><br>
+
+
+::: flex
+::: w-50
+
+$$
+\begin{aligned}
+X_{k} &= d(s_k,\ s_{k-1}) + T(s_k,\ s_{k-1}) X_{k-1} + \eta_{k}\\\\
+Y_k &= c(s_k) + Z(s_k) X_k + \epsilon_{k}\\\\
+\eta_{k} &\sim \textrm{N}(0, Q(s_k,\ s_{k-1}))\\\\
+\epsilon_k & \sim \textrm{N}(0, G(s_k))
+\end{aligned}
+$$
+:::
+
+::: w-50
+
+```{r ss-mod-again,out.width="1000%"}
+include_graphics("gfx/ss-mod-flow.svg")
+```
+
+:::
+:::
+
+## We don't know the discrete states
+
+```{r s-tree}
+#| out-width: "2400px"
+#| out-height: "1250px"
+library(collapsibleTree)
+library(data.tree)
+
+tc <- rev(brewer.pal(4, "PuOr"))
+
+const <- Node$new("Constant tempo", fill=tc[1])
+  cu <- const$AddChild("Speed up", fill=tc[2])
+    cuu <- cu$AddChild("Speed up", fill=tc[2])
+      cuuu <- cuu$AddChild("Speed up", fill=tc[2])
+      cuud <- cuu$AddChild("Slow down", fill=tc[3])
+      cuuc <- cuu$AddChild("Constant tempo", fill=tc[1])
+  cd <- const$AddChild("Slow down", fill=tc[3])
+    cdd <- cd$AddChild("Slow down", fill=tc[3])
+      cddd <- cdd$AddChild("Slow down", fill=tc[3])
+      cddu <- cdd$AddChild("Speed up", fill=tc[2])
+      cddc <- cdd$AddChild("Constant tempo", fill=tc[1])
+  cc <- const$AddChild("Constant tempo", fill=tc[1])
+    ccc <- cc$AddChild("Constant tempo", fill=tc[1])
+      cccs <- ccc$AddChild("Stress", fill=tc[4])
+      cccc <- ccc$AddChild("Constant tempo", fill=tc[1])
+      cccd <- ccc$AddChild("Slow down", fill=tc[3])
+      cccu <- ccc$AddChild("Speed up", fill=tc[2])
+    ccd <- cc$AddChild("Slow down", fill=tc[3])
+      ccdd <- ccd$AddChild("Slow down", fill=tc[3])
+    ccu <- cc$AddChild("Speed up", fill=tc[2])
+      ccuu <- ccu$AddChild("Speed up", fill=tc[2])
+    ccs <- cc$AddChild("Stress", fill=tc[4])
+      ccsc <- ccs$AddChild("Constant tempo", fill=tc[1])
+  cs <- const$AddChild("Stress", fill=tc[4])
+    csc <- cs$AddChild("Constant tempo", fill=tc[1])
+      cscs <- csc$AddChild("Stress", fill=tc[4])
+      cscc <- csc$AddChild("Constant tempo", fill=tc[1])
+      cscu <- csc$AddChild("Speed up", fill=tc[2])
+      cscd <- csc$AddChild("Slow down", fill=tc[3])
+      
+collapsibleTree(const, fill = "fill", fontSize = 30)
+```
+
+
+::: notes
+
+* I have 4 states 
+* 2nd order Markov
+* Leads to 11 states in 1-Markov
+* Piece has 231 notes
+
+:::
+
+## Discrete particle filter &mdash; `dpf()`
+
+1. Track at most $J$ paths through the $M^n$ tree
+
+2. At time $k$, given $J$ paths, propogate each one forward
+
+3. Sample the $JM$ possibilities to get only $J$
+
+4. iterate forward through time until done
+
+```{r s-tree2}
+#| out-width: "2400px"
+#| out-height: "800px"
+collapsibleTree(const, fill = "fill", fontSize = 30, collapsed = TRUE)
+```
+
+::: notes
+
+* This is a greedy approximation
+* AKA "Beam Search"
+* The sampling step is important
+* Probability of sampling is proportional to current weight times likelihood times trans prob
+* Example supposing $J = 5$
+
+:::
+
+## The complete pseudocode
+
+For each performance:
+
+* Iterate 1&mdash;3 to maximize for $\theta \in \Theta$, produce $\widehat\theta$
+  1. Guess a parameter vector $\theta$ (in some sensible way)
+  2. `dpf()` gives greedy state sequence $\{\widehat{S}_k\}_{k=1}^n$
+  3. It gives the likelihood as a side effect via `kfilter()`
+
+* Rerun `dpf()` and `ksmoother()` at $\widehat{\theta}$ to get $\{\widehat{S}_k\}_{k=1}^n$ and $\{\widehat{X}_k\}_{k=1}^n$
+
+
+::: fragment
+![](https://alliancecan.ca/themes/custom/site_theme/logo.svg)
+:::
+
+::: notes
+* Takes a few minutes per performance when 4 is done intelligently
+* I used 6hr walltime on Cedar with 1 perf / core and 10 restarts
+:::
+
+##
+
+```{r two-perfs}
+#| fig-width: 8
+#| fig-height: 4.5
+plots = plots |>
+  mutate(performer, performer = sub('_',' ',performer))
+ggplot(filter(plots, performer %in% c("Richter 1976", "Hatto 1993"))) +
+  annotate("rect",
+    xmin = 33, xmax = 45, ymin = -Inf, ymax = Inf,
+    fill = "gray90", color = "gray90"
+  ) +
+  geom_line(aes(x = measure, y = tempo), color = "gray40") +
+  scale_x_continuous(expand = expansion()) +
+  geom_point(aes(x = measure, y = inferred, color = state, shape = state), size = 2) +
+  scale_color_brewer(palette = "PuOr", direction = -1) +
+  scale_shape_manual(values = perfshapes) +
+  theme(legend.title = element_blank(),
+        strip.text = element_text(hjust = 0))  +
+  facet_wrap(~performer, ncol = 1)
+```
+
+# Similar performances
+
+## The estimated parameters
+
+For each performance, we estimate $\theta$ by penalized maximum likelihood.
+
+The parameters are things like:
+
+  - average speed in different states
+  
+  - some variance parameters
+  
+  - transition probabilities
+  
+We have strong prior information.
+
+::: notes
+Examples of strong priors
+:::
+
+## Distance matrix on parameters
+
+```{r clustering-processing}
+#| cache: true
+perfs <- tempos[, -c(1:3)] %>%
+  as.matrix() %>%
+  t()
+row.names(pvec_ml) <- sub("_", " ", row.names(pvec_ml))
+hc_parm <- pvec_ml %>%
+  Dmats() %>%
+  Reduce(f = "+")
+row.names(hc_parm) <- row.names(pvec_ml)
+hc_perf <- perfs %>%
+  dist() %>%
+  percentize() %>%
+  hclust()
+
+dend_parm <- hc_parm %>%
+  as.dist() %>%
+  hclust() %>%
+  as.dendrogram()
+dend_perf <- hc_perf %>% as.dendrogram()
+source("src/group_means_upper_tri.R")
+```
+
+::: flex
+::: w-50
+
+* Use Mahalanobis
+$$d(\theta,\theta') = \sqrt{(\theta-\theta')^\top V^{-1}(\theta-\theta')}$$
+
+
+* $V$ is prior covariance matrix
+
+
+* Incorporates correlations correctly on probability vectors
+
+
+* Some performances have no "close" neighbors
+
+:::
+::: w-50
+
+
+```{r parametric-clusters}
+#| fig-width: 5
+#| fig-height: 5
+#| dev: "png"
+ggplot(m, aes(Var1, Var2, fill = value)) + 
+  geom_raster() + 
+  scale_fill_viridis_c(direction = -1) +
+  theme_void() +
+  coord_equal() +
+  geom_hline(yintercept = sply, color = "#ffffff", size = .2) +
+  geom_vline(xintercept = splx, color = "#ffffff", size = .2) +
+  theme(legend.position = "none")
+```
+
+:::
+:::
+
+##
+
+```{r make-cluster-plot}
+#| eval: false
+source("src/make-cluster-plot.R")
+```
+
+```{r include-ai-gfx, out.height="800px", out.width="941px", fig.align="center"}
+knitr::include_graphics("gfx/good-clusters.png")
+```
+
+
+##
+
+```{r clustered-parameters}
+#| fig-height: 4.5
+#| fig-width: 8
+lab_lookup <- c(
+  "sigma[epsilon]^2", "mu[tempo]",
+  "mu[acc]", "mu[stress]", "sigma[tempo]^2",
+  "p[1*','*1]", "p[1*','*2]", "p[3*','*1]", "p[1*','*3]",
+  "p[2*','*1]", "p[3*','*2]", "p[2*','*2]"
+)
+
+clustered = data.frame(clust = as.factor(cutree(as.hclust(sdends), k = nclusts)),
+                 performer = row.names(sDmat))
+pvec_all = pvec_ml %>% data.matrix %>% data.frame
+pvec_all$performer = row.names(pvec_ml)
+row.names(pvec_all) = NULL
+pvec_all = full_join(pvec_all, clustered)
+levels(pvec_all$clust) = c(levels(pvec_all$clust),'other')
+pvec_all$clust[is.na(pvec_all$clust)] = 'other'
+
+ttt <- pvec_all %>% gather(key = "parameter", value = "value", -clust, -performer)
+ttt$parameter <- factor(ttt$parameter,
+  levels = unique(ttt$parameter),
+  labels = lab_lookup
+)
+ttt %>% ggplot(aes(x = value, fill = clust)) +
+  geom_density(alpha = .75, adjust = 1.75) +
+  facet_wrap(~parameter,
+    scales = "free",
+    labeller = label_parsed
+  ) +
+  scale_fill_manual(values = fivecolors, name = "") +
+  scale_x_continuous(breaks = scales::pretty_breaks(3), expand = expansion()) +
+  scale_y_continuous(expand = expansion(c(0, 0.05))) +
+  xlab("") +
+  theme(legend.position = "right")
+```
+
+## Probability of "stress"
+
+```{r clustered-p14}
+#| fig-height: 4
+#| fig-width: 8
+p14 <- pvec_all %>%
+  mutate(p14 = 1 - p11 - p12 - p13) %>%
+  select(p14, clust, performer)
+p14 %>% ggplot(aes(x = p14, fill = clust)) +
+  geom_density(alpha = .75, adjust = 1.75) +
+  scale_fill_manual(values = fivecolors, name = "") +
+  scale_x_continuous(breaks = scales::pretty_breaks(3), expand = expansion()) +
+  scale_y_continuous(expand = expansion(c(0, 0.05))) +
+  xlab("") +
+  theme(legend.position = "right")
+```
+
+
+
+##
+
+```{r clust-1}
+#| fig-height: 4.5
+#| fig-width: 8
+lookup <- pvec_all %>% select(performer, clust)
+plots <- plots %>% left_join(lookup) |> as_tibble()
+ggplot(filter(plots, clust == "1")) +
+  annotate(
+    "rect", xmin = 33, xmax = 45, ymin = -Inf, ymax = Inf,
+    fill = "gray90", color = "gray90"
+  ) +
+  geom_line(aes(x = measure, y = tempo), color = "gray40") +
+  geom_point(aes(x = measure, y = inferred, color = state, shape = state), size = 2) +
+  scale_x_continuous(expand = expansion()) +
+  scale_color_brewer(palette = "PuOr", direction = -1, drop = FALSE, name = "") +
+  scale_shape_manual(values = perfshapes, drop = FALSE, name = "") +
+  theme(legend.position = "right", strip.text = element_text(hjust = 0)) +
+  ggtitle("Cluster 1") +
+  facet_wrap(~performer, ncol = 3)
+```
+
+##
+
+```{r clust-2}
+#| fig-height: 4.5
+#| fig-width: 8
+ggplot(filter(plots, clust == "2")) +
+  annotate(
+    "rect", xmin = 33, xmax = 45, ymin = -Inf, ymax = Inf,
+    fill = "gray90", color = "gray90"
+  ) +
+  geom_line(aes(x = measure, y = tempo), color = "gray40") +
+  geom_point(aes(x = measure, y = inferred, color = state, shape = state), size = 2) +
+  scale_color_brewer(palette = "PuOr", direction = -1, drop = FALSE, name = "") +
+  scale_shape_manual(values = perfshapes, name = "") +
+  scale_x_continuous(expand = expansion()) +
+  theme(legend.position = "right", strip.text = element_text(hjust = 0)) +
+  ggtitle("Cluster 2") +
+  facet_wrap(~performer, ncol = 3)
+```
+
+## 
+
+```{r similar-perfs}
+#| fig-height: 4.5
+#| fig-width: 8
+similar <- c("Wasowski 1980", "Shebanova 2002", "Luisada 1991", "Milkina 1970")
+similar <- filter(plots, performer %in% similar) %>%
+  mutate(cl = paste0(performer, ", cluster ", clust))
+ggplot(similar) +
+  annotate(
+    "rect", xmin = 33, xmax = 45, ymin = -Inf, ymax = Inf,
+    fill = "gray90", color = "gray90"
+  ) +
+  geom_line(aes(x = measure, y = tempo), color = "gray40") +
+  geom_point(aes(x = measure, y = inferred, color = state, shape = state), 
+             size = 2) +
+  scale_x_continuous(expand = expansion()) +
+  scale_color_brewer(palette = "PuOr", direction = -1, drop = FALSE, name = "") +
+  scale_shape_manual(values = perfshapes, name = "") +
+  theme(legend.position = "right", strip.text = element_text(hjust = 0)) +
+  facet_wrap(~cl, nrow = 2)
+```
+
+##
+
+```{r rubinstein-perfs}
+#| fig-height: 4.5
+#| fig-width: 8
+similar <- c(
+  "Rubinstein 1939", "Rubinstein 1952",
+  "Rubinstein 1961", "Rubinstein 1966"
+)
+similar <- filter(plots, performer %in% similar) |>
+  mutate(cl = paste0(performer, ", cluster ", clust))
+ggplot(similar) +
+  annotate(
+    "rect", xmin = 33, xmax = 45, ymin = -Inf, ymax = Inf, 
+    fill = "gray90", color = "gray90"
+  ) +
+  geom_line(aes(x = measure, y = tempo), color = "gray40") +
+  geom_point(aes(x = measure, y = inferred, color = state, shape = state), size = 2) +
+  scale_x_continuous(expand = expansion()) +
+  scale_color_brewer(palette = "PuOr", direction = -1, drop = FALSE, name = "") +
+  scale_shape_manual(values = perfshapes, name = "") +
+  theme(legend.position = "right", strip.text = element_text(hjust = 0)) +
+  facet_wrap(~cl, nrow = 2)
+```
+
+##
+
+```{r cortot-performance}
+#| fig-height: 4.5
+#| fig-width: 8
+ggplot(filter(plots, performer == "Cortot 1951")) +
+  annotate(
+    "rect",
+    xmin = 33, xmax = 45, ymin = -Inf, ymax = Inf,
+    fill = "gray90", color = "gray90"
+  ) +
+  geom_line(aes(x = measure, y = tempo), color = "gray40") +
+  geom_point(aes(x = measure, y = inferred, color = state, shape = state), size = 2) +
+  scale_color_brewer(palette = "PuOr", direction = -1, drop = FALSE, name = "") +
+  scale_shape_manual(values = perfshapes, name = "", drop = FALSE) +
+  scale_x_continuous(expand = expansion()) +
+  theme(legend.position = "right", strip.text = element_text(hjust = 0)) +
+  facet_wrap(~performer)
+```
+
+
+::: notes
+* Not actually Cortot
+* Likely Hatto or perhaps even an engineered recording
+* This was a major scandal for the British Concert Artist record label in about 2006/7
+* about 100 other fake recordings 
+* Discovered by uploading to Gracenote database
+
+:::
+
+## In summary
+
+* We develop a switching model for tempo decisions 
+
+* We give an algorithm for performing likelihood inference
+
+* We estimate our model using a large collection of recordings of the same composition
+
+* We demonstrate how the model is able to recover performer intentions
+
+* We use the learned representations to compare and contrast recordings 
+
+::: fragment
+
+### Future work 
+
+* Similar model for dynamics
+
+* Can we do this fast and "online"?
+
+* Use it for teaching?
+
+:::
+
+
+## Collaborators, funding, etc.
+
+::: flex
+::: w-50
+::: {layout="[[50,50], [-25,50,-25]]"}
+![Christopher Raphael](gfx/craphael.jpg){width=250}
+
+![Michael McBride](gfx/mmcbride.jpg){width=250}
+
+![Rob Granger](gfx/rob_granger.jpg){width=250}
+:::
+:::
+
+::: w-50
+
+<iframe width="600" height="300" src="https://www.youtube.com/embed/W8RTpOe-AqA?start=68" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen align="center" caption="Yupeng Gu"></iframe>
+
+<br/>
+
+
+::: {layout="[40,60]" layout-valign="center"}
+![](gfx/nsf-logo.png){width=200}
+
+![](https://www.nserc-crsng.gc.ca/img/logos/img-logo2-en.png){width=300}
+:::
+
+:::
+:::
+
+
+
