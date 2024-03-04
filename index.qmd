@@ -373,9 +373,9 @@ Everything he wrote includes piano
 
 ## Previous analysis
 
-Nicholas Cook, Craig Sapp, and Andrew Earis at CHARM
+* Nicholas Cook, Craig Sapp, and Andrew Earis at CHARM
 
-Among other things, examines correlations between tempo curves
+* Among other things, examines correlations between tempo curves
 
 ::: flex
 ::: w-50
