@@ -382,14 +382,14 @@ Everything he wrote includes piano
 
 [Richter 1976]{.secondary}
 
-![](http://www.mazurka.org.uk/ana/pcor/mazurka68-3-s50/Richter1976-tn.png){fig-align=center width="400px"}
+![](gfx/Richter1976-tn.png){fig-align=center width="400px"}
 
 :::
 
 ::: w-50
 [Cortot 1951]{.secondary}
 
-![](http://www.mazurka.org.uk/ana/pcor/mazurka68-3-s50/Cortot1951-tn.png){fig-align="center" width="400px"}
+![](gfx/Cortot1951-tn.png){fig-align="center" width="400px"}
 
 :::
 
